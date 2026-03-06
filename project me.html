@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Learning Pro | Rwanda Schools</title>
+<style>
+body {font-family: Arial, sans-serif; margin:0; background:#f4f6f9;}
+header{background:#2e7d32;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center;}
+nav a{color:white;margin:10px;text-decoration:none;font-weight:bold;cursor:pointer;}
+section{display:none;padding:50px;text-align:center;}
+#home{display:block;background:linear-gradient(135deg,#2e7d32,#66bb6a);color:white;}
+button{padding:10px 20px;background:#2e7d32;color:white;border:none;border-radius:5px;margin:8px;cursor:pointer;}
+input,select,textarea{padding:10px;width:250px;margin:5px;}
+textarea{resize:none;}
+.dashboard{background:white;padding:30px;max-width:600px;margin:auto;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.2); position:relative;}
+.show-pass-btn{cursor:pointer;position:absolute;margin-left:-35px;margin-top:12px;color:#555;}
+.input-container{position:relative;display:inline-block;}
+.search-card{background:white;padding:15px;margin:10px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.2);text-align:left;}
+footer ul{list-style:none;padding:0;margin-top:10px;}
+footer a{text-decoration:none; transition:0.3s;}
+footer a:hover{color:#43a047;}
+.social a{display:inline-flex;align-items:center;color:white;padding:10px 15px;margin:5px 5px 5px 0;border-radius:20px;text-decoration:none;font-weight:bold;transition: all 0.3s;}
+.social a:hover{transform:scale(1.1);filter: brightness(1.2);}
+
+/* Chat Modal */
+#chatModal {display:none;position:fixed;bottom:20px;right:20px;width:300px;max-height:400px;background:white;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.3);overflow:hidden;flex-direction:column;z-index:1000;}
+#chatHeader {background:#2e7d32;color:white;padding:10px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;}
+#chatMessages {padding:10px;height:250px;overflow-y:auto;border-top:1px solid #ccc;border-bottom:1px solid #ccc;background:#f9f9f9;}
+#chatInput {display:flex;padding:5px;}
+#chatInput input {flex:1;padding:5px;}
+#chatInput button {padding:5px 10px;margin-left:5px;}
+.chat-message {margin-bottom:5px;padding:5px 8px;border-radius:5px;background:#e0e0e0;}
+.chat-message.teacher {background:#c8e6c9;text-align:right;}
+#chartContainer{display:none;margin-top:20px;}
+
+/* Developer animation: glow + bounce */
+.developer{
+  font-weight:bold;
+  color:#43a047;
+  font-size:16px;
+  display:inline-block;
+  animation: glowBounce 3s infinite;
+}
+@keyframes glowBounce {
+  0% {transform: translateY(0); text-shadow: 0 0 5px #43a047, 0 0 10px #66bb6a;}
+  25% {transform: translateY(-5px); text-shadow: 0 0 10px #2e7d32, 0 0 20px #a5d6a7;}
+  50% {transform: translateY(0); text-shadow: 0 0 15px #43a047, 0 0 25px #81c784;}
+  75% {transform: translateY(-5px); text-shadow: 0 0 10px #2e7d32, 0 0 20px #a5d6a7;}
+  100% {transform: translateY(0); text-shadow: 0 0 5px #43a047, 0 0 10px #66bb6a;}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h2>E-Learning Pro</h2>
+<nav>
+<a onclick="show('home')">Home</a>
+<a onclick="show('about')">About</a>
+<a onclick="show('mission')">Mission</a>
+<a onclick="show('login')">Login</a>
+<a onclick="show('register')">Sign Up</a>
+<a onclick="show('contact')">Contact</a>
+<a onclick="show('exam')">Exams</a>
+<a onclick="show('createExam')">Create Exam</a>
+<a onclick="show('fileTeacher')">Files (Teacher)</a>
+<a onclick="show('fileStudent')">Files (Student)</a>
+</nav>
+</header>
+
+<!-- HOME -->
+<section id="home">
+<h1>Welcome to E-Learning Platform</h1>
+<p>Online learning and school report management system for students, teachers, and schools in Rwanda.</p>
+<input type="text" id="searchInput" placeholder="Search schools..." oninput="homeSearch()"><br>
+<div id="searchResults" style="margin-top:10px;"></div>
+<button onclick="copyResults()">Copy Results</button>
+<br>
+<button onclick="show('register')">Start Learning</button>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+<h1>About Our Platform</h1>
+<p>E-Learning Pro is a modern digital learning platform for managing students, teachers, and reports online. We provide accessible tools for education and school administration across Rwanda.</p>
+</section>
+
+<!-- MISSION -->
+<section id="mission">
+<h1>Our Mission</h1>
+<p>Empowering students, teachers, and schools in Rwanda with an easy-to-use digital learning platform, ensuring quality education and transparent reporting.</p>
+</section>
+
+<!-- REGISTER -->
+<section id="register">
+<div class="dashboard">
+<h2>Register</h2>
+<input id="regUser" placeholder="Username"><br>
+<div class="input-container">
+<input id="regPass" type="password" placeholder="Password">
+<span class="show-pass-btn" onclick="togglePass('regPass')">👁️</span>
+</div><br>
+<select id="regRole">
+<option value="">Select Role</option>
+<option value="student">Student</option>
+<option value="teacher">Teacher</option>
+<option value="admin">Admin</option>
+</select><br>
+<button onclick="register()">Register</button>
+</div>
+</section>
+
+<!-- LOGIN -->
+<section id="login">
+<div class="dashboard">
+<h2>Login</h2>
+<input id="logUser" placeholder="Username"><br>
+<div class="input-container">
+<input id="logPass" type="password" placeholder="Password">
+<span class="show-pass-btn" onclick="togglePass('logPass')">👁️</span>
+</div><br>
+<select id="logRole">
+<option value="">Select Role</option>
+<option value="student">Student</option>
+<option value="teacher">Teacher</option>
+<option value="admin">Admin</option>
+</select><br>
+<button onclick="login()">Login</button>
+</div>
+</section>
+
+<!-- STUDENT DASHBOARD -->
+<section id="student">
+<div class="dashboard">
+<h2>👨‍🎓 Student Dashboard</h2>
+<h3>View School Report</h3>
+<p id="studentReport">No report available</p>
+<button onclick="showChat()">💬 Live Chat</button>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- TEACHER DASHBOARD -->
+<section id="teacher">
+<div class="dashboard">
+<h2> Teacher Dashboard</h2>
+<h3>Add Student Marks</h3>
+<input id="studentName" placeholder="Student Username"><br>
+<input id="studentMark" placeholder="Marks"><br>
+<button onclick="addReport()">Save Report</button>
+<button onclick="showChart()">📊 View Reports Chart</button>
+<button onclick="showChat()">💬 Live Chat</button>
+<button onclick="logout()">Logout</button>
+
+<!-- Chart -->
+<div id="chartContainer">
+<canvas id="reportChart"></canvas>
+</div>
+</div>
+</section>
+
+<!-- ADMIN DASHBOARD -->
+<section id="admin">
+<div class="dashboard">
+<h2> Admin Dashboard</h2>
+<h3>View Registered Users</h3>
+<button onclick="viewUsers()">Show Users</button>
+<p id="usersList"></p>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+<h2>Contact Us</h2>
+<p>Email: shemasamuel264@gmail.com</p>
+<p>Phone: +250 790717768</p>
+<p>Location: MTC IS, P.O. Box 2007, Muhanga, Rwanda</p>
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.263137470265!2d29.7641301759782!3d-2.105150898144518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca0dc7a4c3fbb%3A0x8ed1d1a6b9b5765a!2sMuhanga%20Technical%20College%20(MTC)!5e0!3m2!1sen!2srw!4v1709665367890!5m2!1sen!2srw" width="100%" height="350" style="border:0;border-radius:10px;" allowfullscreen="" loading="lazy"></iframe>
+</section>
+
+<!-- EXAMS - STUDENT -->
+<section id="exam">
+<div class="dashboard">
+<h2> Online Exam</h2>
+<div id="examContent">
+<p>Select an exam to start:</p>
+<select id="examSelect"></select>
+<button onclick="startExam()">Start Exam</button>
+<div id="questionArea" style="display:none;">
+<h3 id="questionText"></h3>
+<div id="options"></div>
+<button onclick="nextQuestion()">Next</button>
+</div>
+<p id="examScore"></p>
+</div>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- CREATE EXAM - TEACHER -->
+<section id="createExam">
+<div class="dashboard">
+<h2> Create Exam</h2>
+<input id="examTitle" placeholder="Exam Title"><br>
+<textarea id="examQuestions" placeholder="Format: Question|Option1,Option2,Option3,Option4|CorrectOptionIndex" style="width:100%;height:150px;"></textarea><br>
+<button onclick="saveExam()">Save Exam</button>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- FILE MANAGEMENT TEACHER -->
+<section id="fileTeacher">
+<div class="dashboard">
+<h2>Teacher File Management</h2>
+<input type="file" id="uploadFile"><br>
+<button onclick="uploadFile()">Upload File</button>
+<h3>Uploaded Files</h3>
+<ul id="fileListTeacher"></ul>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- FILE MANAGEMENT STUDENT -->
+<section id="fileStudent">
+<div class="dashboard">
+<h2>Student File Management</h2>
+<h3>Available Files</h3>
+<ul id="fileListStudent"></ul>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- CHAT MODAL -->
+<div id="chatModal">
+  <div id="chatHeader">
+    Live Chat
+    <span style="cursor:pointer;" onclick="closeChat()">✖</span>
+  </div>
+  <div id="chatMessages"></div>
+  <div id="chatInput">
+    <input id="chatMsg" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="background:#2f075e;color:white;padding:50px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;font-family:Arial, sans-serif;">
+  <div style="flex:1; min-width:250px;">
+    <h3 style="font-weight:bold; color:#43a047;">E-Learning Pro</h3>
+    <p>A global platform dedicated to providing the best online learning and school report management system across Rwanda.</p>
+  </div>
+  <div style="flex:1; min-width:150px;">
+    <h4 style="border-bottom:2px solid #0015ff; display:inline-block; padding-bottom:2px; color:#43a047;">Quick Links</h4>
+    <ul style="padding-left:0; list-style:none; margin-top:10px;">
+      <li><a href="#about" style="color:white;">About Us</a></li>
+      <li><a href="#contact" style="color:white;">Privacy Policy</a></li>
+      <li><a href="#home" style="color:white;">Terms & Conditions</a></li>
+    </ul>
+  </div>
+  <div style="flex:1; min-width:180px;">
+    <h4 style="border-bottom:2px solid #43a047; display:inline-block; padding-bottom:2px; color:#43a047;">Follow Us</h4>
+    <div class="social">
+      <a href="https://youtube.com" target="_blank" style="background:#FF0000;"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" style="width:25px;margin-right:8px;">YouTube</a>
+      <a href="https://footballgla" target="_blank" style="background:linear-gradient(45deg, #f09433,#e6683c,#dc2743,#cc2366,#bc1888);"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" style="width:25px;margin-right:8px;">Instagram</a>
+      <a href="https://tiktok.com" target="_blank" style="background:#000; color:white;"><img src="https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg" style="width:25px;margin-right:8px;">TikTok</a>
+    </div>
+  </div>
+  <div style="flex:1; min-width:200px;">
+    <h4 style="border-bottom:2px solid #43a047; display:inline-block; padding-bottom:2px; color:#43a047;">Contact</h4>
+    <ul style="list-style:none; padding-left:0; margin-top:10px;">
+      <li> +250 790717768</li>
+      <li>💬 +250 790717768</li>
+      <li>✉️ shemasamuel264@gmail.com</li>
+    </ul>
+  </div>
+  <div style="width:100%; text-align:center; margin-top:20px; font-size:14px; color:#ccc;">
+    &copy; 2026 E-Learning Pro. All rights reserved.
+    <p class="developer">Developed by Shema Samuel 💻</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// User management
+let currentUser=null;
+const rwandaSchools=[{name:"University of Rwanda",level:"University",province:"Kigali City"},{name:"Adventist University of Central Africa",level:"University",province:"Kigali City"},{name:"Université Libre de Kigali (ULK)",level:"University",province:"Kigali City"},{name:"University of Global Health Equity (UGHE)",level:"University",province:"Eastern Province"},{name:"Green Hills Academy",level:"Secondary",province:"Kigali City"},{name:"International School of Kigali",level:"Secondary",province:"Kigali City"},{name:"Lycée de Kigali",level:"Secondary",province:"Kigali City"},{name:"Maryhill Girls Secondary School",level:"Secondary",province:"Eastern Province"},{name:"MBUGA Primary School",level:"Primary",province:"Northern Province"},{name:"Nyabiheke Primary School",level:"Primary",province:"Eastern Province"},{name:"Katarara Primary School",level:"Primary",province:"Eastern Province"},{name:"International Technical School of Kigali",level:"TVET",province:"Kigali City"},{name:"Muhabura Integrated Polytechnic College",level:"TVET",province:"Northern Province"}];
+
+// Sections display
+function show(id){
+document.querySelectorAll("section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
+closeChat(); closeChart();
+if(id==="exam"){loadExams();}
+if(id==="fileTeacher"){loadTeacherFiles();}
+if(id==="fileStudent"){loadStudentFiles();}
+}
+
+// Toggle password
+function togglePass(id){let input=document.getElementById(id); input.type=input.type==="password"?"text":"password";}
+
+// Register
+function register(){
+let user=document.getElementById("regUser").value.trim();
+let pass=document.getElementById("regPass").value.trim();
+let role=document.getElementById("regRole").value;
+if(!user||!pass||!role){alert("Fill all fields"); return;}
+let users=JSON.parse(localStorage.getItem("users"))||[];
+if(users.some(u=>u.username===user)){alert("Username exists"); return;}
+users.push({username:user,password:pass,role:role});
+localStorage.setItem("users",JSON.stringify(users)); alert("Registration successful"); show("login");
+}
+
+// Login
+function login(){
+let user=document.getElementById("logUser").value.trim();
+let pass=document.getElementById("logPass").value.trim();
+let role=document.getElementById("logRole").value;
+if(!user||!pass||!role){alert("Select role and fill fields"); return;}
+let users=JSON.parse(localStorage.getItem("users"))||[];
+let found=users.find (u=>u.username===user&&u.password===pass&&u.role===role);
+if(found){currentUser=found; alert("Login successful"); show(role);} else {alert
+("Invalid credentials");}
+}
+// Logout
+function logout(){currentUser=null; alert("Logged out"); show("home");}
+
+// Home search
+function homeSearch(){
+
+let query=document.getElementById("searchInput").value.toLowerCase();
+let results=rwandaSchools.filter(s=>s.name.toLowerCase().includes(query)||s.level
+.toLowerCase().includes(query)||s.province.toLowerCase().includes(query));
+let resultsDiv=document.getElementById("searchResults");
+
+if(results.length===0){resultsDiv.innerHTML="<p>No schools found</p>"; return;}
+resultsDiv.innerHTML=results.map(s=>`<div class="search-card"><h3>${s.name}</h3><p>Level: ${s.level}</p><p>Province: ${s.province}</p></div>`).join("");
+}
+// Copy results
+function copyResults(){
+let results=document.querySelectorAll("#searchResults .search-card");
+if(results.length===0){alert("No results to copy"); return;}
+let text=Array.from(results).map(r=>r.innerText).join("\n\n");
+navigator.clipboard.writeText(text).then(()=>alert("Results copied to clipboard")).catch(err=>
+
+alert("Failed to copy: "+err));
+}   
+// Chat functionality
+function showChat(){document.getElementById("chatModal").style.display="flex";}
+function closeChat(){document.getElementById("chatModal").style.display="none";}        
+function sendMessage(){
+let msgInput=document.getElementById("chatMsg");
+let msg=msgInput.value.trim();
+if(!msg){return;}
+let messagesDiv=document.getElementById("chatMessages");
+
+
+let userType=currentUser.role==="teacher"?"teacher":"student";
+
+
+let msgDiv=document.createElement("div");
+msgDiv.className="chat-message "+userType;
+msgDiv.innerText=msg;
+messagesDiv.appendChild(msgDiv);
+msgInput.value="";
+messagesDiv.scrollTop=messagesDiv.scrollHeight;
+}
+
+// Exam functionality
+function loadExams(){
+let exams=JSON.parse(localStorage.getItem("exams"))||[];
+let examSelect=document.getElementById("examSelect");   
+examSelect.innerHTML=exams.length===0?`<option value="">No exams available</option>`:exams.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
+}
+function startExam(){
+let examIndex=document.getElementById("examSelect").value;
+if(examIndex===""){alert("Select an exam"); return;}
+let exams=JSON.parse(localStorage.getItem("exams"))||[];
+
+let exam=exams[examIndex];
+if(!exam){alert("Exam not found"); return;}
+let questionArea=document.getElementById("questionArea");
+let questionText=document.getElementById("questionText");
+let optionsDiv=document.getElementById("options");
+let currentQuestion=0;
+let score=0;
+questionArea.style.display="block";
+questionText.innerText=exam.questions[currentQuestion].question;
+optionsDiv.innerHTML=exam.questions[currentQuestion].options.map((o,i)=>`<div><input type="radio" name="option" value="${i}"> ${o}</div>`).join("");
+document.querySelector("#questionArea button").onclick=function(){
+let selected=document.querySelector('input[name="option"]:checked');
+if(!selected){alert("Select an option"); return;}
+if(parseInt(selected.value)===exam.questions[currentQuestion].correct){score++;}
+currentQuestion++;
+if(currentQuestion<exam.questions.length){
+questionText.innerText=exam.questions[currentQuestion].question;
+optionsDiv.innerHTML=exam.questions[currentQuestion].options.map((o,i)=>`<div                                                               
+<input type="radio" name="option" value="${i}"> ${o}</div>`).join("");
+} else {
+document.getElementById("examScore").innerText=`Your score: ${score} / ${exam.questions.length}`;
+questionArea.style.display="none";
+}
+};
+}
+// Create exam
+function saveExam(){
+let title=document.getElementById("examTitle").value.trim();
+let questionsText=document.getElementById("examQuestions").value.trim();
+if(!title||!questionsText){alert("Fill all fields"); return;}
+let questions=questionsText.split("\n").map(line=>{
+let parts=line.split("|");
+if(parts.length!==3){return null;}
+return {
+question: parts[0],
+options: parts[1].split(","),
+correct: parseInt(parts[2])
+};
+}).filter(q=>q!==null);
+if(questions.length===0){alert("Invalid questions format"); return;}
+let exams=JSON.parse(localStorage.getItem("exams"))||[];
+
+exams.push({title:title,questions:questions});
+localStorage.setItem("exams",JSON.stringify(exams)); alert("Exam saved"); document.getElementById("examTitle").value=""; document.getElementById("examQuestions").value="";
+}
+// Report management
+function addReport(){
+let student=document.getElementById("studentName").value.trim();
+let mark=document.getElementById("studentMark").value.trim();
+if(!student||!mark){alert("Fill all fields"); return;}
+let reports=JSON.parse(localStorage.getItem("reports"))||[];
+reports.push({student:student,mark:mark});
+localStorage.setItem("reports",JSON.stringify(reports)); alert("Report saved"); document.getElementById("studentName").value=""; document.getElementById("studentMark").value="";
+}
+function showChart(){
+let reports=JSON.parse(localStorage.getItem("reports"))||[];
+if(reports.length===0){alert("No reports to show"); return;}
+let ctx=document.getElementById("reportChart").getContext("2d");
+
+let chart=new Chart(ctx,{
+type:"bar",
+data:{
+labels:reports.map(r=>r.student),
+datasets:[{
+label:"Marks",
+data:reports.map(r=>r.mark),
+backgroundColor:"rgba(46,125,50,0.7)"
+}]
+},
+
+
+options:{
+scales:{y:{beginAtZero:true}}
+}
+});
+document.getElementById("chartContainer").style.display="block";
+}
+function closeChart(){
+document.getElementById("chartContainer").style.display="none";
+}
+// File management
+
+function uploadFile(){
+let fileInput=document.getElementById("uploadFile");
+let file=fileInput.files[0];
+if(!file){alert("Select a file to upload"); return;}
+let reader=new FileReader();
+reader.onload=function(e){
+let content=e.target.result;
+let files=JSON.parse(localStorage.getItem("files"))||[];
+files.push({name:file.name,content:content,uploadedBy:currentUser.username});
+localStorage.setItem("files",JSON.stringify(files)); alert("File uploaded"); fileInput.value=""; loadTeacherFiles();
+};
+reader.readAsDataURL(file);
+}
+function loadTeacherFiles(){
+let files=JSON.parse(localStorage.getItem("files"))||[];
+let fileList=document.getElementById("fileListTeacher");
+
+fileList.innerHTML=files.filter(f=>f.uploadedBy===currentUser.username).length===0?`<p>No files uploaded</p>`:files.filter(f=>f.uploadedBy===currentUser.username).map(f=>`<li>${f.name} <button onclick="deleteFile('${f.name}')">Delete</button></li>`).join("");
+}
+function loadStudentFiles(){
+
+let files=JSON.parse(localStorage.getItem("files"))||[];
+let fileList=document.getElementById("fileListStudent");
+fileList.innerHTML=files.length===0?`<p>No files available</p>`:files.map(f=>`<li><a href="${f.content}" download="${f.name}">${f.name}</a></li>`).join("");
+}
+function deleteFile(fileName){
+let files=JSON.parse(localStorage.getItem("files"))||[];
+files=files.filter(f=>!(f.name===fileName&&f.uploadedBy===currentUser.username));
+localStorage.setItem("files",JSON.stringify(files)); alert("File deleted"); loadTeacherFiles
+();
+}
+// View users (admin)
+function viewUsers(){
+let users=JSON.parse(localStorage.getItem("users"))||[];
+let usersList=document.getElementById("usersList");
+usersList.innerHTML=users.length===0?`<p>No registered users</p>`:users.map(u=>`<p>${u.username} (${u.role})</p>`).join("");
+}
+</script>
+</body>
+</html>
